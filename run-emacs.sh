@@ -1,1 +1,1 @@
-emacs -q -l ./init.el
+emacs -q -l ~/emacs-config/init.el
