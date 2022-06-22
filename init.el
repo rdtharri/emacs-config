@@ -86,6 +86,7 @@
   (evil-mode 1)
   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
   (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+;;  (define-key evil-insert-state-map (kbd "TAB") 'evil-shift-right)
 
   ;; Use visual line motions even outside of visual-line-mode buffers
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
@@ -109,6 +110,8 @@
     "ss" '(vterm :which-key "new shell")
     "p"  '(:ignore t :which-key "projects")
     "pp" '(projectile-switch-project :which-key "new project")
+    "pr" '(projectile-run-project :which-key "run project")
+    "pf" '(counsel-projectile-grep :which-key "find in project")
     "f"  '(:ignore t :which-key "find")
     "ff" '(counsel-rg :which-key "counsel-rg")))
 
@@ -500,7 +503,9 @@
 
 (use-package projectile
   :diminish projectile-mode
-  :config (projectile-mode)
+  :config
+  (projectile-mode)
+  (setq compilation-scroll-output t)
   :custom ((projectile-completion-system 'ivy))
   :bind-keymap
   ("C-c p" . projectile-command-map)
@@ -590,6 +595,9 @@
 (require 'sas-mode "sas-mode.el")
 
 ;; Whitespace Settings
+;; This just shows tabs/cleans up trailing blanks
+;; To remove tabs use untabify
+;; For an example, see sas-mode definition
 (setq whitespace-style '(face tabs tab-mark trailing))
 (custom-set-faces
  '(whitespace-tab ((t (:foreground "#636363")))))

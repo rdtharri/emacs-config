@@ -21,6 +21,16 @@
 (define-derived-mode sas-mode prog-mode "sas"
   "Major Mode for editing SAS code."
 
+  (setq-local indent-tabs-mode nil)
+  (setq-local tab-width 4)
+  (setq-local indent-line-function 'insert-tab)
+  (setq-local backward-delete-char-untabify-method 'hungry)
+  (setq-local evil-shift-width 4)
+
+  (company-mode)
+  (setq-local company-dabbrev-downcase nil)
+
+  (setq-local electric-indent-inhibit t)
   (add-hook 'before-save-hook
             (lambda ()
               (when (eq major-mode 'sas-mode) (untabify (point-min) (point-max)))))
