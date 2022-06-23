@@ -95,6 +95,7 @@
   (evil-set-initial-state 'dashboard-mode 'normal))
 
 (use-package evil-mc
+  :bind ("C-g" . evil-mc-undo-all-cursors)
   :config
   (global-evil-mc-mode 1)
   (evil-define-key 'visual evil-mc-key-map
