@@ -38,20 +38,15 @@
   (auto-package-update-maybe)
   (auto-package-update-at-time "09:00"))
 
-;; See Whitespace Everywhere
-
-
 (use-package no-littering)
 (setq auto-save-file-name-transforms
       `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 
 (setq inhibit-startup-message t)
-
 (scroll-bar-mode -1)        ; Disable visible scrollbar
 (tool-bar-mode -1)          ; Disable the toolbar
 (tooltip-mode -1)           ; Disable tooltips
 (set-fringe-mode 10)        ; Give some breathing room
-
 (menu-bar-mode -1)            ; Disable the menu bar
 
 ;; Set up the visible bell
@@ -68,9 +63,8 @@
 		eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
+;; Fonts
 (set-face-attribute 'default nil :font "Fira Code Retina" :height efs/default-font-size)
-
-;; Set the fixed pitch face
 (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height efs/default-font-size)
 
 ;; Make ESC quit prompts
@@ -119,6 +113,7 @@
     "pp" '(projectile-switch-project :which-key "new project")
     "pr" '(projectile-run-project :which-key "run project")
     "pf" '(counsel-projectile-grep :which-key "find in project")
+    "pF" '(counsel-projectile-rg :which-key "find in project fast")
     "f"  '(:ignore t :which-key "find")
     "ff" '(counsel-rg :which-key "counsel-rg")))
 
@@ -126,11 +121,6 @@
   :after evil
   :config
   (evil-collection-init))
-
-(use-package evil-easymotion
-  :after evil
-  :config
-  (evilem-default-keybindings "SPC"))
 
 (use-package command-log-mode
   :commands command-log-mode)
@@ -154,6 +144,7 @@
 (use-package ivy
   :diminish
   :bind (("C-s" . swiper)
+	 ("C-/" . comment-or-uncomment-region)
 	 :map ivy-minibuffer-map
 	 ("TAB" . ivy-alt-done)
 	 ("C-l" . ivy-alt-done)
@@ -416,6 +407,9 @@
 
 (defun efs/lsp-mode-setup ()
   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+  (setq gc-cons-threshold 100000000)
+  (setq read-process-output-max (* 1024 1024)) ;; 1mb
+  (setq lsp-idle-delay 0.5)
   (lsp-headerline-breadcrumb-mode))
 
 (use-package lsp-mode
@@ -491,6 +485,15 @@
   :config
   (pyvenv-mode 1))
 
+(use-package rust-mode
+  :mode "\\.rs\\'"
+  :ensure t
+  :hook (rust-mode . lsp-deferred)
+  (rust-mode . (lambda () (setq indent-tabs-mode nil)))
+  (rust-mode . (lambda () (prettify-symbols-mode)))
+  :config
+  (setq rust-format-on-save t))
+
 (use-package yaml-mode
   :mode "\\.yaml\\'")
 
@@ -535,6 +538,9 @@
   :commands magit-status
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+
+(use-package git-gutter
+  :config (global-git-gutter-mode))
 
 ;; NOTE: Make sure to configure a GitHub token before using this package!
 ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation

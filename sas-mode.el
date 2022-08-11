@@ -26,6 +26,8 @@
   (setq-local indent-line-function 'insert-tab)
   (setq-local backward-delete-char-untabify-method 'hungry)
   (setq-local evil-shift-width 4)
+  (setq-local comment-start "/*")
+  (setq-local comment-end "*/")
 
   (company-mode)
   (setq-local company-dabbrev-downcase nil)
@@ -40,5 +42,6 @@
 
 ;;;#autoload
 (add-to-list 'auto-mode-alist '("\\.sas\\'" . sas-mode))
+(add-to-list 'auto-mode-alist '("\\.tpl\\'" . sas-mode))
 
 (provide 'sas-mode)
