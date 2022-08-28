@@ -107,6 +107,11 @@
   (efs/leader-keys
     "t"  '(:ignore t :which-key "toggles")
     "tt" '(counsel-load-theme :which-key "choose theme")
+    "l"  '(:ignore t :which-key "lsp")
+    "le" '(lsp-treemacs-errors-list :which-key "lsp error list")
+    "lf" '(lsp-find-definition :which-key "lsp definition")
+    "li" '(lsp-treemacs-implementations :which-key "lsp implementations")
+    "lr" '(lsp-treemacs-references :which-key "lsp references")
     "s"  '(:ignore t :which-key "shell")
     "ss" '(vterm :which-key "new shell")
     "p"  '(:ignore t :which-key "projects")
@@ -114,6 +119,11 @@
     "pr" '(projectile-run-project :which-key "run project")
     "pf" '(counsel-projectile-grep :which-key "find in project")
     "pF" '(counsel-projectile-rg :which-key "find in project fast")
+    "pt" '(projectile-test-project :which-key "test project")
+    "d"  '(:ignore t :which-key "debug")
+    "dd" '(dap-debug :which-key "dap debug")
+    "db" '(dap-breakpoint-toggle :which-key "breakpoint")
+    "dh" '(dap-hydra :which-key "dap hydra")
     "f"  '(:ignore t :which-key "find")
     "ff" '(counsel-rg :which-key "counsel-rg")))
 
@@ -450,8 +460,9 @@
   ;; Set up Node debugging
   (require 'dap-node)
   (dap-node-setup) ;; Automatically installs Node debug adapter if needed
-  (require 'dap-go)
+  (require 'dap-dlv-go)
   (dap-go-setup)
+  (require 'dap-python)
 
   ;; Bind `C-c l d` to `dap-hydra` for easy access
   (general-define-key
@@ -473,9 +484,6 @@
   :ensure t
   :hook (python-mode . lsp-deferred)
   :custom
-  ;; NOTE: Set these if Python 3 is called "python3" on your system!
-  ;; (python-shell-interpreter "python3")
-  ;; (dap-python-executable "python3")
   (dap-python-debugger 'debugpy)
   :config
   (require 'dap-python))
@@ -484,6 +492,11 @@
   :after python-mode
   :config
   (pyvenv-mode 1))
+
+(use-package python-black
+  :demand t
+  :after python
+  :hook (python-mode . python-black-on-save-mode-enable-dwim))
 
 (use-package rust-mode
   :mode "\\.rs\\'"
@@ -533,6 +546,9 @@
 (use-package counsel-projectile
   :after projectile
   :config (counsel-projectile-mode))
+
+(use-package treemacs-projectile
+  :after projectile)
 
 (use-package magit
   :commands magit-status
@@ -618,3 +634,30 @@
   '((tab-mark 9 [124 9] [92 9])))
 (add-hook 'before-save-hook 'whitespace-cleanup)
 (global-whitespace-mode)
+
+;; Send process to region
+(defun tws-region-to-process (arg beg end)
+  "Send the current region to a process buffer.
+The first time it's called, will prompt for the buffer to
+send to. Subsequent calls send to the same buffer, unless a
+prefix argument is used (C-u), or the buffer no longer has an
+active process."
+  (interactive "P\nr")
+  (if (or arg ;; user asks for selection
+          (not (boundp 'tws-process-target)) ;; target not set
+          ;; or target is not set to an active process:
+          (not (process-live-p (get-buffer-process
+                                tws-process-target))))
+      (setq tws-process-target
+            (completing-read
+             "Process: "
+             (seq-map (lambda (el) (buffer-name (process-buffer el)))
+                      (process-list)))))
+  (process-send-region tws-process-target beg end))
+(efs/leader-keys
+  "S" '(tws-region-to-process :which-key "send region to process"))
+
+;; Messing Around with LISP
+(use-package slime
+  :config
+  (setq inferior-lisp-program "sbcl"))
